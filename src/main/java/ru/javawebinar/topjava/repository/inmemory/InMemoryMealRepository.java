@@ -13,15 +13,18 @@ public class InMemoryMealRepository implements MealRepository {
     private final Map<Integer, Meal> mealsMap = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
 
+    private final Map<Integer, Map<Integer, Meal>> mealsMapByUser = new ConcurrentHashMap<>();
+
     {
-        MealsUtil.meals.forEach(this::save);
+        MealsUtil.meals.forEach(meal -> save(meal, 1));
+        mealsMapByUser.put(1, mealsMap);
     }
 
     @Override
-    public Meal save(Meal meal) {
+    public Meal save(Meal meal, Integer userId) {
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            mealsMap.put(meal.getId(), meal);
+            mealsMapByUser.get(userId).put(meal.getId(), meal);
             return meal;
         }
         // handle case: update, but not present in storage
