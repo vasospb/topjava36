@@ -1,5 +1,6 @@
 package ru.javawebinar.topjava.repository;
 
+import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 
 import java.util.Collection;
@@ -10,7 +11,7 @@ public interface MealRepository {
     Meal save(Meal meal, Integer userId);
 
     // false if meal does not belong to userId
-    boolean delete(int id);
+    boolean delete(int id, int userId);
 
     // null if meal does not belong to userId
     Meal get(int id);
