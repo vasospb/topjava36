@@ -23,7 +23,7 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public boolean delete(int id) {
         log.info("delete {}", id);
-        return true;
+        return usersMap.remove(id) != null;
     }
 
     @Override
