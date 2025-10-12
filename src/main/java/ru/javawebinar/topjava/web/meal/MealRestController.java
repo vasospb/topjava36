@@ -30,7 +30,7 @@ public class MealRestController {
     }
 
     public Collection<Meal> getAll(Integer userId) {
-
+        mealService.
         return null;
     }
 }
