@@ -19,38 +19,36 @@ public class InMemoryMealRepository implements MealRepository {
 
     {
         MealsUtil.meals.forEach(meal -> save(meal, 1));
-        mealsMapByUser.put(1, mealsMap);
     }
 
     @Override
     public Meal save(Meal meal, Integer userId) {
+        Map<Integer, Meal> userMeals = mealsMapByUser.computeIfAbsent(userId, k -> new ConcurrentHashMap<>());
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            if (mealsMapByUser.containsKey(userId)) {
-                mealsMapByUser.get(userId).put(meal.getId(), meal);
-            } else {
-                mealsMapByUser.put(userId, new ConcurrentHashMap<>());
-                mealsMapByUser.get(userId).put(meal.getId(), meal);
-            }
-            return meal;
         }
-        // handle case: update, but not present in storage
-        return mealsMap.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
+        userMeals.put(meal.getId(), meal);
+        return meal;
     }
 
     @Override
     public boolean delete(int id, int userId) {
-        return mealsMapByUser.get(userId).remove(id) != null;
+        if (mealsMapByUser.containsKey(userId)) {
+            return mealsMapByUser.get(userId).remove(id) != null;
+        } else {
+            return false;
+        }
     }
 
     @Override
-    public Meal get(int id) {
-        return mealsMap.get(id);
+    public Meal get(int id, int userId) {
+        Map<Integer, Meal> userMeals = mealsMapByUser.get(userId);
+        return userMeals != null ? userMeals.get(id) : null;
     }
 
     @Override
-    public Collection<Meal> getAll() {
-        return mealsMap.values();
+    public Collection<Meal> getAll(int userId) {
+        return mealsMapByUser.getOrDefault(userId, null).values();
     }
 }
 
