@@ -12,9 +12,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class InMemoryMealRepository implements MealRepository {
-    private final Map<Integer, Meal> mealsMap = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
 
+    private final Map<Integer, Meal> mealsMap = new ConcurrentHashMap<>();
     private final Map<Integer, Map<Integer, Meal>> mealsMapByUser = new ConcurrentHashMap<>();
 
     {
@@ -26,7 +26,12 @@ public class InMemoryMealRepository implements MealRepository {
     public Meal save(Meal meal, Integer userId) {
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            mealsMapByUser.get(userId).put(meal.getId(), meal);
+            if (mealsMapByUser.containsKey(userId)) {
+                mealsMapByUser.get(userId).put(meal.getId(), meal);
+            } else {
+                mealsMapByUser.put(userId, new ConcurrentHashMap<>());
+                mealsMapByUser.get(userId).put(meal.getId(), meal);
+            }
             return meal;
         }
         // handle case: update, but not present in storage

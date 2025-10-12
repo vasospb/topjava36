@@ -10,6 +10,9 @@ import java.util.Collection;
 public class MealRestController {
     private MealService mealService;
 
+    public MealRestController() {
+    }
+
     public MealRestController(MealService mealService) {
         this.mealService = mealService;
     }
