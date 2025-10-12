@@ -8,10 +8,7 @@ import java.util.Collection;
 
 @Controller
 public class MealRestController {
-    private MealService mealService;
-
-    public MealRestController() {
-    }
+    private final MealService mealService;
 
     public MealRestController(MealService mealService) {
         this.mealService = mealService;
@@ -22,7 +19,7 @@ public class MealRestController {
     }
 
     public void delete(int id, Integer userId) {
-
+        mealService.delete(id, userId);
     }
 
     public Meal get(int id, Integer userId) {
@@ -30,7 +27,6 @@ public class MealRestController {
     }
 
     public Collection<Meal> getAll(Integer userId) {
-        mealService.
-        return null;
+        return mealService.getAll(userId);
     }
 }

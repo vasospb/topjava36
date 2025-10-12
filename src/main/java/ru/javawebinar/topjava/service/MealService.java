@@ -6,6 +6,9 @@ import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
+import java.util.Collection;
+import java.util.List;
+
 @Service
 public class MealService {
 
@@ -26,7 +29,9 @@ public class MealService {
         return true;
     }
 
-
+    public Collection<Meal> getAll(int userId) {
+        return repository.getAll(userId);
+    }
 
 
 }
