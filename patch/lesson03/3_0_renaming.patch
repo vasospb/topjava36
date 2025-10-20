@@ -1,0 +1,149 @@
+Subject: [PATCH] 3_0_renaming
+---
+Index: src/main/java/ru/javawebinar/topjava/util/ValidationUtil.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/ru/javawebinar/topjava/util/ValidationUtil.java b/src/main/java/ru/javawebinar/topjava/util/ValidationUtil.java
+--- a/src/main/java/ru/javawebinar/topjava/util/ValidationUtil.java	(revision b50e7ec331f551746463a74e9b4decf24ef52c48)
++++ b/src/main/java/ru/javawebinar/topjava/util/ValidationUtil.java	(date 1728678494305)
+@@ -6,12 +6,12 @@
+ 
+ public class ValidationUtil {
+ 
+-    public static <T> T checkNotFoundWithId(T object, int id) {
+-        checkNotFoundWithId(object != null, id);
++    public static <T> T checkNotFound(T object, int id) {
++        checkNotFound(object != null, id);
+         return object;
+     }
+ 
+-    public static void checkNotFoundWithId(boolean found, int id) {
++    public static void checkNotFound(boolean found, int id) {
+         checkNotFound(found, "id=" + id);
+     }
+ 
+@@ -26,7 +26,7 @@
+         }
+     }
+ 
+-    public static void checkNew(AbstractBaseEntity entity) {
++    public static void checkIsNew(AbstractBaseEntity entity) {
+         if (!entity.isNew()) {
+             throw new IllegalArgumentException(entity + " must be new (id=null)");
+         }
+Index: src/main/java/ru/javawebinar/topjava/web/user/AbstractUserController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/ru/javawebinar/topjava/web/user/AbstractUserController.java b/src/main/java/ru/javawebinar/topjava/web/user/AbstractUserController.java
+--- a/src/main/java/ru/javawebinar/topjava/web/user/AbstractUserController.java	(revision b50e7ec331f551746463a74e9b4decf24ef52c48)
++++ b/src/main/java/ru/javawebinar/topjava/web/user/AbstractUserController.java	(date 1728678494297)
+@@ -9,7 +9,7 @@
+ import java.util.List;
+ 
+ import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
+-import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
++import static ru.javawebinar.topjava.util.ValidationUtil.checkIsNew;
+ 
+ public abstract class AbstractUserController {
+     protected final Logger log = LoggerFactory.getLogger(getClass());
+@@ -29,7 +29,7 @@
+ 
+     public User create(User user) {
+         log.info("create {}", user);
+-        checkNew(user);
++        checkIsNew(user);
+         return service.create(user);
+     }
+ 
+Index: src/main/java/ru/javawebinar/topjava/service/UserService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/ru/javawebinar/topjava/service/UserService.java b/src/main/java/ru/javawebinar/topjava/service/UserService.java
+--- a/src/main/java/ru/javawebinar/topjava/service/UserService.java	(revision b50e7ec331f551746463a74e9b4decf24ef52c48)
++++ b/src/main/java/ru/javawebinar/topjava/service/UserService.java	(date 1729114836259)
+@@ -7,7 +7,6 @@
+ import java.util.List;
+ 
+ import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFound;
+-import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFoundWithId;
+ 
+ @Service
+ public class UserService {
+@@ -23,11 +22,11 @@
+     }
+ 
+     public void delete(int id) {
+-        checkNotFoundWithId(repository.delete(id), id);
++        checkNotFound(repository.delete(id), id);
+     }
+ 
+     public User get(int id) {
+-        return checkNotFoundWithId(repository.get(id), id);
++        return checkNotFound(repository.get(id), id);
+     }
+ 
+     public User getByEmail(String email) {
+@@ -39,6 +38,6 @@
+     }
+ 
+     public void update(User user) {
+-        checkNotFoundWithId(repository.save(user), user.getId());
++        checkNotFound(repository.save(user), user.getId());
+     }
+ }
+\ No newline at end of file
+Index: src/main/java/ru/javawebinar/topjava/repository/inmemory/InMemoryMealRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/ru/javawebinar/topjava/repository/inmemory/InMemoryMealRepository.java b/src/main/java/ru/javawebinar/topjava/repository/inmemory/InMemoryMealRepository.java
+--- a/src/main/java/ru/javawebinar/topjava/repository/inmemory/InMemoryMealRepository.java	(revision b50e7ec331f551746463a74e9b4decf24ef52c48)
++++ b/src/main/java/ru/javawebinar/topjava/repository/inmemory/InMemoryMealRepository.java	(date 1729114852919)
+@@ -10,7 +10,7 @@
+ import java.util.concurrent.atomic.AtomicInteger;
+ 
+ public class InMemoryMealRepository implements MealRepository {
+-    private final Map<Integer, Meal> repository = new ConcurrentHashMap<>();
++    private final Map<Integer, Meal> mealsMap = new ConcurrentHashMap<>();
+     private final AtomicInteger counter = new AtomicInteger(0);
+ 
+     {
+@@ -21,26 +21,26 @@
+     public Meal save(Meal meal) {
+         if (meal.isNew()) {
+             meal.setId(counter.incrementAndGet());
+-            repository.put(meal.getId(), meal);
++            mealsMap.put(meal.getId(), meal);
+             return meal;
+         }
+         // handle case: update, but not present in storage
+-        return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
++        return mealsMap.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
+     }
+ 
+     @Override
+     public boolean delete(int id) {
+-        return repository.remove(id) != null;
++        return mealsMap.remove(id) != null;
+     }
+ 
+     @Override
+     public Meal get(int id) {
+-        return repository.get(id);
++        return mealsMap.get(id);
+     }
+ 
+     @Override
+     public Collection<Meal> getAll() {
+-        return repository.values();
++        return mealsMap.values();
+     }
+ }
+ 
