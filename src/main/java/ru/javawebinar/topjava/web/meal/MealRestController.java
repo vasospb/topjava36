@@ -23,7 +23,7 @@ public class MealRestController {
     }
 
     public Meal get(int id, Integer userId) {
-        return null;
+        return mealService.get(id, userId);
     }
 
     public Collection<Meal> getAll(Integer userId) {

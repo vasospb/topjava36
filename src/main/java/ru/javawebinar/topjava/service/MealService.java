@@ -29,6 +29,9 @@ public class MealService {
         return true;
     }
 
+    public Meal get(Integer mealId, Integer userId) {
+        return repository.get(mealId, userId);
+    }
     public Collection<Meal> getAll(int userId) {
         return repository.getAll(userId);
     }
